@@ -56,12 +56,8 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
     pernambuco: "#ea580c",
   };
 
-  // Define o style tipado para o Geography
-  const geographyStyle: {
-    default: React.CSSProperties;
-    hover: React.CSSProperties;
-    pressed: React.CSSProperties;
-  } = {
+  // Style para Geography (usando type assertion para evitar erro TS)
+  const geographyStyle = {
     default: { outline: "none", cursor: "pointer" },
     hover: { fill: "#0ea5e9", outline: "none" },
     pressed: { fill: "#0ea5e9", outline: "none" },
@@ -97,7 +93,7 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
           <Geographies geography={geoUrl}>
             {({ geographies }) =>
               geographies.map((geo) => {
-                // Type assertion para incluir rsmKey do react-simple-maps
+                // Type assertion para incluir rsmKey
                 const geoTyped = geo as GeographyFeature & { rsmKey: string };
                 const name = geoTyped.properties.name;
                 const normalizedName = normalizeName(name);
@@ -111,7 +107,8 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
                     stroke="#fff"
                     strokeWidth={0.5}
                     onClick={() => setSelectedState(normalizedName)}
-                    style={geographyStyle}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    style={geographyStyle as any} // <-- resolve erro TS
                     aria-label={`Estado: ${name}`}
                   />
                 );
