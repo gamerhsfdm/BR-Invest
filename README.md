@@ -14,6 +14,37 @@ Com o BRInvest, você pode:
 
 ---
 
+## Funcionalidades em Destaque
+
+### Dashboard Intuitiva
+
+A nossa dashboard oferece uma visão geral clara e concisa do ecossistema de startups e investimentos no Brasil. Visualize dados importantes de forma rápida e eficiente.
+
+<p align="center">
+  <img src="./dashboard.png" alt="Dashboard do BRInvest" width="800">
+</p>
+<p align="center"><em>Visão geral da dashboard principal.</em></p>
+
+### Relatórios Detalhados
+
+Gere relatórios personalizados com insights aprofundados sobre setores específicos, tendências de investimento e o desempenho de startups.
+
+<p align="center">
+  <img src="./relatorio.png" alt="Exemplo de Relatório Gerado" width="800">
+</p>
+<p align="center"><em>Um exemplo de relatório detalhado com análises e gráficos.</em></p>
+
+### Interação com a Inteligência Artificial
+
+Utilize nossa interface intuitiva para fazer perguntas diretamente à IA e obter insights personalizados sobre o mercado de investimentos e startups.
+
+<p align="center">
+  <img src="./ia_pergunta.png" alt="Interface de Pergunta para a IA" width="800">
+</p>
+<p align="center"><em>Faça perguntas e receba respostas inteligentes da nossa IA.</em></p>
+
+---
+
 ## Tecnologias Utilizadas
 
 Este projeto foi construído utilizando as seguintes tecnologias e bibliotecas:
