@@ -82,6 +82,7 @@ export default function RelatoriosPage() {
         throw new Error("Falha na requisição da API de relatórios.");
       const data = await response.json();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const startupsParsed = (data.startupsPorAno || []).map((item: any) => ({
         ...item,
         year: String(item.year),
