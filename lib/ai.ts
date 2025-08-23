@@ -1,15 +1,20 @@
-import { NextResponse } from "next/server";
-
 const API_KEY = process.env.API_KEY;
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
 const MAX_RETRIES = 5;
 
+interface JsonObject {
+  [key: string]: unknown;
+}
+
 /**
- * @param prompt 
+ * @param prompt
  * @param schema 
  * @returns 
  */
-export const generateAIDataWithSchema = async (prompt: string, schema: any): Promise<any | null> => {
+export const generateAIDataWithSchema = async (
+  prompt: string,
+  schema: object
+): Promise<JsonObject | null> => {
   const payload = {
     contents: [
       {
@@ -34,11 +39,18 @@ export const generateAIDataWithSchema = async (prompt: string, schema: any): Pro
       if (!response.ok) {
         if (response.status === 429 && attempt < MAX_RETRIES - 1) {
           const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
-          console.warn(`Tentativa ${attempt + 1} falhou com status ${response.status}. Retentando em ${delay / 1000}s...`);
-          await new Promise(res => setTimeout(res, delay));
+          console.warn(
+            `Tentativa ${attempt + 1} falhou com status ${
+              response.status
+            }. Retentando em ${delay / 1000}s...`
+          );
+          await new Promise((res) => setTimeout(res, delay));
           continue;
         } else {
-          throw new Error(`Erro na API da IA: ${response.statusText}`);
+          const errorText = await response.text();
+          throw new Error(
+            `Erro na API da IA: ${response.statusText} - ${errorText}`
+          );
         }
       }
 
@@ -49,10 +61,12 @@ export const generateAIDataWithSchema = async (prompt: string, schema: any): Pro
         console.error("Resposta da IA não contém dados JSON válidos.");
         return null;
       }
-      
+
       return JSON.parse(jsonData);
-    } catch (error) {
-      console.error(`Erro na requisição para a IA: ${error}`);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro desconhecido";
+      console.error(`Erro na requisição para a IA: ${errorMessage}`);
       if (attempt === MAX_RETRIES - 1) {
         return null;
       }
