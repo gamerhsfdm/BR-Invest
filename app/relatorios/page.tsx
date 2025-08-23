@@ -19,24 +19,24 @@ import {
   PieChart as PieChartIcon,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AsideSidebar from "../components/AsideSidebar";
 
+// Tipagens
 interface StartupData {
   year: string;
   count: number;
 }
-
 interface InvestmentData {
   state: string;
   public: number;
   private: number;
 }
-
 interface ChartCardProps {
   title: string;
   children: React.ReactNode;
 }
 
-
+// Wrapper de gráfico
 const ChartCard = ({ title, children }: ChartCardProps) => (
   <div className="bg-white rounded-xl shadow-lg p-6 transition-transform duration-300 hover:scale-[1.01]">
     <h2 className="text-xl font-semibold text-gray-700 mb-4">{title}</h2>
@@ -44,49 +44,26 @@ const ChartCard = ({ title, children }: ChartCardProps) => (
   </div>
 );
 
-
-const InvestmentBarCharts = ({ data }: { data: InvestmentData[] }) => {
-  return (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart
-        data={data}
-        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-      >
-        <CartesianGrid
-          strokeDasharray="3 3"
-          stroke="#e5e7eb"
-          vertical={false}
-        />
-        <XAxis dataKey="state" stroke="#6b7280" />
-        <YAxis stroke="#6b7280" />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: "#f9fafb",
-            borderRadius: 8,
-            border: "none",
-          }}
-          labelStyle={{ color: "#374151", fontWeight: 600 }}
-        />
-        <Legend />
-        <Bar dataKey="public" fill="#3b82f6" name="Público" />
-        <Bar dataKey="private" fill="#10b981" name="Privado" />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-};
-
-
-const AsideSidebar = () => (
-  <aside className="fixed top-0 left-0 w-20 h-full bg-white shadow-lg p-4 flex flex-col items-center justify-between border-r border-gray-200 z-40">
-  
-    <div className="text-blue-500 font-bold text-2xl">A</div>
-    <nav className="flex flex-col gap-4">
-
-      <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-      <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-    </nav>
-    <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-  </aside>
+// Gráfico de investimentos
+const InvestmentBarCharts = ({ data }: { data: InvestmentData[] }) => (
+  <ResponsiveContainer width="100%" height={300}>
+    <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+      <XAxis dataKey="state" stroke="#6b7280" />
+      <YAxis stroke="#6b7280" />
+      <Tooltip
+        contentStyle={{
+          backgroundColor: "#f9fafb",
+          borderRadius: 8,
+          border: "none",
+        }}
+        labelStyle={{ color: "#374151", fontWeight: 600 }}
+      />
+      <Legend />
+      <Bar dataKey="public" fill="#3b82f6" name="Público" />
+      <Bar dataKey="private" fill="#10b981" name="Privado" />
+    </BarChart>
+  </ResponsiveContainer>
 );
 
 export default function RelatoriosPage() {
@@ -94,29 +71,23 @@ export default function RelatoriosPage() {
   const [investimentoData, setInvestimentoData] = useState<InvestmentData[]>(
     []
   );
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Buscar dados
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        "/api/ai/relatorios"
-      );
-      if (!response.ok) {
+      const response = await fetch("/api/ai/relatorios");
+      if (!response.ok)
         throw new Error("Falha na requisição da API de relatórios.");
-      }
       const data = await response.json();
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const startupsParsed = (data.startupsPorAno || []).map((item: any) => ({
         ...item,
         year: String(item.year),
       }));
 
       sessionStorage.setItem("relatorios_data", JSON.stringify(data));
-
       setStartupData(startupsParsed);
       setInvestimentoData(data.investimentoPorEstado || []);
     } catch (err) {
@@ -126,6 +97,7 @@ export default function RelatoriosPage() {
     }
   };
 
+  // Cache local
   useEffect(() => {
     const cachedData = sessionStorage.getItem("relatorios_data");
     if (cachedData) {
@@ -135,51 +107,25 @@ export default function RelatoriosPage() {
         setInvestimentoData(parsedData.investimentoPorEstado || []);
         setLoading(false);
         return;
-      } catch (e) {
-        console.error(
-          "Erro ao carregar dados do cache, buscando da API novamente.",
-          e
-        );
+      } catch {
         sessionStorage.removeItem("relatorios_data");
       }
     }
-
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 768px)");
-    setIsDesktop(mediaQuery.matches);
-
-    const handler = (e: MediaQueryListEvent) => {
-      setIsDesktop(e.matches);
-      if (e.matches) setDrawerOpen(false);
-    };
-
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
-  }, []);
-
   const topInvestimento = [...investimentoData].sort(
-    (a, b) =>
-      (b.public || 0) + (b.private || 0) - ((a.public || 0) + (a.private || 0))
+    (a, b) => b.public + b.private - (a.public + a.private)
   )[0];
 
   return (
     <div className="flex min-h-screen bg-gray-50 relative">
-      <AsideSidebar />
-
-      {!isDesktop && drawerOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-30 z-40"
-          onClick={() => setDrawerOpen(false)}
-        />
-      )}
-
+      <AsideSidebar /> {/* ✅ usando seu sidebar já pronto */}
       <main
         className="flex-1 p-4 md:p-8 w-full min-w-0 pt-24 overflow-auto transition-all duration-300 relative z-0"
-        style={{ marginLeft: isDesktop ? 80 : 0 }}
+        style={{ marginLeft: 80 }} // espaço fixo pro sidebar
       >
+        {/* Loader */}
         {loading && (
           <div className="fixed inset-0 bg-gray-50/70 z-50 flex items-center justify-center">
             <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
@@ -190,6 +136,7 @@ export default function RelatoriosPage() {
           className="max-w-7xl mx-auto space-y-8 transition-opacity duration-500"
           style={{ opacity: loading ? 0.5 : 1 }}
         >
+          {/* Header */}
           <section className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end">
             <div>
               <h1 className="text-4xl font-extrabold text-gray-900">
@@ -232,25 +179,6 @@ export default function RelatoriosPage() {
                   </>
                 ) : (
                   <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M16.023 9.348h4.992v-.001m-4.992 0a2.25 2.25 0 01-2.244 2.244 2.25 2.25 0 00-2.243 2.243H9.256m10.027-2.243a2.25 2.25 0 00-2.243-2.244m-2.244 2.244L9.256 12m2.244-2.244L16.023 9.348m-4.47-4.47a2.25 2.25 0 012.244-2.244v-.001m-2.244 2.244v-.001m-2.244 2.244h-.001a2.25 2.25 0 00-2.243 2.243h2.243m2.243-2.243a2.25 2.25 0 012.244-2.244h-.001M8.995 2.25L5.75 5.5m0 0a2.25 2.25 0 01-2.243 2.243h-.001m-2.244-2.243a2.25 2.25 0 00-2.243 2.243h-.001m-2.243-2.243a2.25 2.25 0 012.244-2.244v-.001m2.244 2.244v-.001m2.244 2.244h-.001a2.25 2.25 0 00-2.243 2.243h2.243"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 9v6m0-3h-3m3 0h3m-6 3a9 9 0 111-9a9 9 0 01-1 9z"
-                      />
-                    </svg>
                     <span>Atualizar dados</span>
                   </>
                 )}
@@ -258,6 +186,7 @@ export default function RelatoriosPage() {
             </div>
           </section>
 
+          {/* Cards Resumo */}
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 bg-gradient-to-br from-blue-50 to-blue-200 border-none">
               <CardHeader className="flex items-center gap-3">
@@ -309,6 +238,7 @@ export default function RelatoriosPage() {
             </Card>
           </section>
 
+          {/* Gráficos */}
           <section className="mt-8 space-y-8">
             <ChartCard title="Startups por Ano">
               <ResponsiveContainer width="100%" height={300}>
@@ -316,22 +246,6 @@ export default function RelatoriosPage() {
                   data={startupData}
                   margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
                 >
-                  <defs>
-                    <linearGradient
-                      id="lineGradient"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8} />
-                      <stop
-                        offset="100%"
-                        stopColor="#3b82f6"
-                        stopOpacity={0.2}
-                      />
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid strokeDasharray="5 5" stroke="#e5e7eb" />
                   <XAxis dataKey="year" stroke="#6b7280" />
                   <YAxis stroke="#6b7280" />
@@ -355,7 +269,6 @@ export default function RelatoriosPage() {
                       strokeWidth: 2,
                     }}
                     activeDot={{ r: 8 }}
-                    fill="url(#lineGradient)"
                     animationDuration={1500}
                   />
                 </ReLineChart>
@@ -368,7 +281,7 @@ export default function RelatoriosPage() {
           </section>
         </div>
       </main>
-
+      {/* Loader CSS */}
       <style jsx>{`
         .loader {
           border-top-color: #3b82f6;
