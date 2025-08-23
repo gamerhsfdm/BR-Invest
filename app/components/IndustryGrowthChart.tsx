@@ -18,6 +18,7 @@ interface IndustryGrowthData {
   value_percent: number; 
   status: string; 
 }
+
 interface IndustryGrowthChartProps {
   data: IndustryGrowthData[];
 }
@@ -37,10 +38,13 @@ export default function IndustryGrowthChart({
     { state: "Minas Gerais", public: 20, private: 60 },
   ];
 
-  const industryDataForSummary = industryGrowthData.map((item) => ({
-    year: item.year,
-    value: item.value_percent, 
-  }));
+  const industryDataForSummary: IndustryGrowthData[] = industryGrowthData.map(
+    (item) => ({
+      year: item.year,
+      value_percent: item.value_percent, 
+      status: item.status || "",         
+    })
+  );
 
   const maxValue =
     industryGrowthData.length > 0
