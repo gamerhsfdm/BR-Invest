@@ -1,18 +1,21 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 const AIResponseCard = () => {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
+    // Media Query para detectar o tamanho da tela
     const mediaQuery = window.matchMedia("(min-width: 768px)");
     setIsDesktop(mediaQuery.matches);
 
-    const handler = (e) => setIsDesktop(e.matches);
+    // Tipagem explícita para o evento 'e'
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
     mediaQuery.addEventListener("change", handler);
+
+    // Função de limpeza para remover o listener quando o componente é desmontado
     return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
@@ -20,7 +23,7 @@ const AIResponseCard = () => {
     <>
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg z-50"
+        className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg z-50 transition-transform duration-300 hover:scale-110 active:scale-95"
         aria-label="Abrir card da IA"
       >
         <svg
@@ -57,7 +60,7 @@ const AIResponseCard = () => {
       >
         <button
           onClick={() => setOpen(false)}
-          className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700"
+          className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors duration-200"
           aria-label="Fechar card da IA"
         >
           <svg
@@ -103,13 +106,13 @@ const AIResponseCard = () => {
           </p>
         </div>
 
-        <button
+        <a
+          href="/perguntar" // Substituído onClick por um link <a>
+          className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 text-white font-semibold py-2 rounded-xl shadow-sm transition-colors duration-200 text-center block"
           aria-label="Perguntar para a IA"
-          onClick={() => router.push("/perguntar")}
-          className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 text-white font-semibold py-2 rounded-xl shadow-sm transition-colors duration-200"
         >
           Perguntar
-        </button>
+        </a>
       </div>
     </>
   );
