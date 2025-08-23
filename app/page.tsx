@@ -1,6 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { TooltipProps } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+import type {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
+
 import AIResponseCard from "./components/AIResponseCard";
 import BrazilMap from "./components/BrazilMap";
 import InvestmentBarCharts from "./components/InvestmentBarCharts";
@@ -8,7 +15,7 @@ import AsideSidebar from "./components/AsideSidebar";
 import EvolutionStartups from "./components/EvolutionStartups";
 import IndustryGrowthChart from "./components/IndustryGrowthChart";
 import QuickSummaryCard from "./components/QuickSummaryCard";
-import StartupComparisonCharts from "./components/StartupComparisonCharts";
+
 interface StartupData {
   year: string;
   count: number;
@@ -17,15 +24,16 @@ interface StartupData {
 
 interface IndustryGrowthData {
   year: string;
-  value_percent: number; 
+  value_percent: number;
   status: string;
 }
 
 interface InvestmentByState {
   state: string;
-  investment_million_brl: number; 
+  investment_million_brl: number;
   status: string;
 }
+
 interface AIData {
   resposta: string;
   dados: {
@@ -34,6 +42,107 @@ interface AIData {
     crescimento_industria: IndustryGrowthData[];
   };
 }
+
+interface ChartData {
+  name: string;
+  value: number;
+  color?: string;
+  description?: string;
+}
+
+interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
+  data?: ChartData[];
+}
+
+const DEFAULT_COLORS = [
+  "#1A73E8",
+  "#EA4335",
+  "#F7B500",
+  "#34A853",
+  "#4285F4",
+  "#FBBC04",
+];
+
+const isChartData = (obj: any): obj is ChartData => {
+  return (
+    typeof obj === "object" && obj !== null && "name" in obj && "value" in obj
+  );
+};
+
+const CustomTooltip = ({ active, payload, data }: CustomTooltipProps) => {
+  if (active && payload && payload.length > 0 && data) {
+    const itemData = payload[0]?.payload;
+    if (isChartData(itemData)) {
+      const { name, value, description } = itemData;
+
+      const total = data.reduce((acc, curr) => acc + curr.value, 0);
+      const percentage = total > 0 ? (value / total) * 100 : 0;
+
+      return (
+        <div className="bg-white p-3 border border-gray-200 shadow-md rounded-lg text-sm">
+          <p className="font-bold text-gray-800">{name}</p>
+          <p className="text-gray-600 mt-1">Valor: {value}</p>
+          <p className="text-gray-600">
+            Porcentagem: {Math.round(percentage)}%
+          </p>
+          {description && (
+            <p className="text-gray-500 text-xs mt-2">{description}</p>
+          )}
+        </div>
+      );
+    }
+  }
+  return null;
+};
+
+interface StartupComparisonChartsProps {
+  data: ChartData[];
+}
+
+const StartupComparisonCharts: React.FC<StartupComparisonChartsProps> = ({
+  data,
+}) => {
+  return (
+    <div className="w-full bg-white shadow-xl rounded-2xl flex flex-col gap-8 border-4 border-gray-50">
+      <h2 className="text-xl sm:text-2xl font-extrabold mb-4 text-center text-gray-900 tracking-tight">
+        Evolução de Startups (2023-2025)
+      </h2>
+      <div className="flex flex-col items-center justify-center w-full min-h-80 transition-transform hover:scale-105 duration-300 ease-in-out">
+        <PieChart width={300} height={300}>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            innerRadius={70}
+            outerRadius={100}
+            paddingAngle={4}
+            stroke="none"
+            isAnimationActive={true}
+            animationDuration={500}
+          >
+            {data.map((entry, i) => (
+              <Cell
+                key={`cell-${i}`}
+                fill={entry.color || DEFAULT_COLORS[i % DEFAULT_COLORS.length]}
+                className="transition-transform duration-300 ease-in-out"
+              />
+            ))}
+          </Pie>
+          <Tooltip
+            content={(props) => <CustomTooltip {...props} data={data} />}
+          />
+          <Legend
+            verticalAlign="bottom"
+            layout="horizontal"
+            wrapperStyle={{ paddingTop: "1rem" }}
+          />
+        </PieChart>
+      </div>
+    </div>
+  );
+};
 
 function useDashboardData() {
   const [data, setData] = useState<AIData | null>(null);
@@ -69,8 +178,10 @@ function useDashboardData() {
       sessionStorage.setItem("dashboard_data", JSON.stringify(result));
 
       setData(result);
-    } catch (err: any) {
-      console.error("Erro no fetch do dashboard:", err);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Erro desconhecido";
+      console.error("Erro no fetch do dashboard:", errorMessage);
       setError(
         "Não foi possível carregar o dashboard. Verifique sua conexão e a API."
       );
@@ -86,17 +197,20 @@ function useDashboardData() {
         const parsedData = JSON.parse(cachedData);
         setData(parsedData);
         setLoading(false);
-        return; 
-      } catch (e) {
+        return;
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Erro desconhecido";
         console.error(
-          "Erro ao carregar dados do cache, buscando da API novamente."
+          "Erro ao carregar dados do cache, buscando da API novamente.",
+          errorMessage
         );
         sessionStorage.removeItem("dashboard_data");
       }
     }
 
     fetchData();
-  }, []); 
+  }, []);
 
   return {
     startupData: data?.dados?.startups_por_ano || [],
@@ -106,7 +220,7 @@ function useDashboardData() {
     loading,
     error,
     progress: loading ? 50 : 100,
-    refreshData: fetchData, 
+    refreshData: fetchData,
   };
 }
 
@@ -140,6 +254,24 @@ export default function DashboardPage() {
     progress,
     refreshData,
   } = useDashboardData();
+
+  const MOCKED_DATA_COMBINED: ChartData[] = [
+    {
+      name: "Ativas (2023-2025)",
+      value: 155 + 180 + 200,
+      description: "Total de startups ativas nos três anos.",
+    },
+    {
+      name: "Adquiridas (2023-2025)",
+      value: 20 + 25 + 30,
+      description: "Total de startups adquiridas nos três anos.",
+    },
+    {
+      name: "Fechadas (2023-2025)",
+      value: 12 + 10 + 15,
+      description: "Total de startups fechadas nos três anos.",
+    },
+  ];
 
   return (
     <div className="flex bg-gray-50 font-sans min-h-screen relative">
@@ -241,7 +373,7 @@ export default function DashboardPage() {
                 <EvolutionStartups data={startupData} />
               </div>
               <div className="lg:col-span-1">
-                <StartupComparisonCharts data={startupData} />
+                <StartupComparisonCharts data={MOCKED_DATA_COMBINED} />
               </div>
 
               <div className="lg:col-span-2">

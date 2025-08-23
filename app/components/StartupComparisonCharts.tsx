@@ -8,7 +8,6 @@ import type {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
-
 interface ChartData {
   name: string;
   value: number;
@@ -30,14 +29,12 @@ const DEFAULT_COLORS = [
   "#FBBC04",
 ];
 
-
 interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
   data?: ChartData[];
 }
 
 const CustomTooltip = ({ active, payload, data }: CustomTooltipProps) => {
   if (active && payload && payload.length && data) {
-    
     const { name, value, description } = payload[0].payload as ChartData;
 
     const total = data.reduce((acc, curr) => acc + curr.value, 0);
@@ -88,9 +85,11 @@ const StartupComparisonCharts: React.FC = () => {
         setLoading(false);
         return;
       } catch (err: unknown) {
-        
+        const errorMessage =
+          err instanceof Error ? err.message : "Erro desconhecido";
         console.error(
-          "Erro ao carregar dados do cache, buscando da API novamente."
+          "Erro ao carregar dados do cache, buscando da API novamente.",
+          errorMessage
         );
         sessionStorage.removeItem("startup_chart_data");
       }
@@ -111,15 +110,15 @@ const StartupComparisonCharts: React.FC = () => {
           JSON.stringify(dataToSave)
         );
         setError(null);
-      } catch (err) {
-        
-        console.error("Erro na requisição da API:", err);
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Erro desconhecido";
+        console.error("Erro na requisição da API:", errorMessage);
         setError("Erro inesperado");
       } finally {
         setLoading(false);
       }
     }, 1000);
-  
   }, []);
 
   return (
@@ -164,7 +163,11 @@ const StartupComparisonCharts: React.FC = () => {
                 />
               ))}
             </Pie>
-            <Tooltip content={<CustomTooltip data={datasets[0].data} />} />
+            <Tooltip
+              content={(props) => (
+                <CustomTooltip {...props} data={datasets[0].data} />
+              )}
+            />
             <Legend
               verticalAlign="bottom"
               layout="horizontal"
