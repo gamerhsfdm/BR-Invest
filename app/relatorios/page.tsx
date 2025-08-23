@@ -21,7 +21,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AsideSidebar from "../components/AsideSidebar";
 
-// Tipagens
+
 interface StartupData {
   year: string;
   count: number;
@@ -36,7 +36,7 @@ interface ChartCardProps {
   children: React.ReactNode;
 }
 
-// Wrapper de gráfico
+
 const ChartCard = ({ title, children }: ChartCardProps) => (
   <div className="bg-white rounded-xl shadow-lg p-6 transition-transform duration-300 hover:scale-[1.01]">
     <h2 className="text-xl font-semibold text-gray-700 mb-4">{title}</h2>
@@ -44,7 +44,7 @@ const ChartCard = ({ title, children }: ChartCardProps) => (
   </div>
 );
 
-// Gráfico de investimentos
+
 const InvestmentBarCharts = ({ data }: { data: InvestmentData[] }) => (
   <ResponsiveContainer width="100%" height={300}>
     <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -73,7 +73,7 @@ export default function RelatoriosPage() {
   );
   const [loading, setLoading] = useState(true);
 
-  // Buscar dados
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -98,7 +98,7 @@ export default function RelatoriosPage() {
     }
   };
 
-  // Cache local
+
   useEffect(() => {
     const cachedData = sessionStorage.getItem("relatorios_data");
     if (cachedData) {
@@ -121,12 +121,12 @@ export default function RelatoriosPage() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 relative">
-      <AsideSidebar /> {/* ✅ usando seu sidebar já pronto */}
+      <AsideSidebar />
       <main
         className="flex-1 p-4 md:p-8 w-full min-w-0 pt-24 overflow-auto transition-all duration-300 relative z-0"
-        style={{ marginLeft: 80 }} // espaço fixo pro sidebar
+        
       >
-        {/* Loader */}
+
         {loading && (
           <div className="fixed inset-0 bg-gray-50/70 z-50 flex items-center justify-center">
             <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
@@ -137,7 +137,7 @@ export default function RelatoriosPage() {
           className="max-w-7xl mx-auto space-y-8 transition-opacity duration-500"
           style={{ opacity: loading ? 0.5 : 1 }}
         >
-          {/* Header */}
+
           <section className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-end">
             <div>
               <h1 className="text-4xl font-extrabold text-gray-900">
@@ -187,7 +187,7 @@ export default function RelatoriosPage() {
             </div>
           </section>
 
-          {/* Cards Resumo */}
+
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 bg-gradient-to-br from-blue-50 to-blue-200 border-none">
               <CardHeader className="flex items-center gap-3">
@@ -239,7 +239,7 @@ export default function RelatoriosPage() {
             </Card>
           </section>
 
-          {/* Gráficos */}
+
           <section className="mt-8 space-y-8">
             <ChartCard title="Startups por Ano">
               <ResponsiveContainer width="100%" height={300}>
@@ -282,7 +282,7 @@ export default function RelatoriosPage() {
           </section>
         </div>
       </main>
-      {/* Loader CSS */}
+
       <style jsx>{`
         .loader {
           border-top-color: #3b82f6;

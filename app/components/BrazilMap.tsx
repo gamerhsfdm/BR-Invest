@@ -17,7 +17,6 @@ interface BrazilMapProps {
   data: InvestmentByState[];
 }
 
-// Tipagem para cada geography do mapa
 interface GeographyProperties {
   name: string;
 }
@@ -30,7 +29,7 @@ const normalizeName = (str: string) =>
 const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
   const [selectedState, setSelectedState] = useState<string | null>(null);
 
-  // Organiza os dados por estado (chave normalizada)
+  
   const dataByState: Record<string, { investimento: string }> = {};
   data.forEach((item) => {
     if (!item.state || item.public === undefined || item.private === undefined)
@@ -56,7 +55,7 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
     pernambuco: "#ea580c",
   };
 
-  // Style para Geography (usando type assertion para evitar erro TS)
+  
   const geographyStyle = {
     default: { outline: "none", cursor: "pointer" },
     hover: { fill: "#0ea5e9", outline: "none" },
@@ -93,7 +92,7 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
           <Geographies geography={geoUrl}>
             {({ geographies }) =>
               geographies.map((geo) => {
-                // Type assertion para incluir rsmKey
+              
                 const geoTyped = geo as GeographyFeature & { rsmKey: string };
                 const name = geoTyped.properties.name;
                 const normalizedName = normalizeName(name);
@@ -108,7 +107,7 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
                     strokeWidth={0.5}
                     onClick={() => setSelectedState(normalizedName)}
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    style={geographyStyle as any} // <-- resolve erro TS
+                    style={geographyStyle as any}
                     aria-label={`Estado: ${name}`}
                   />
                 );
