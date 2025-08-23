@@ -63,15 +63,21 @@ const DEFAULT_COLORS = [
   "#FBBC04",
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isChartData = (obj: any): obj is ChartData => {
   return (
     typeof obj === "object" && obj !== null && "name" in obj && "value" in obj
   );
 };
 
-const CustomTooltip = ({ active, payload, data }: CustomTooltipProps) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  data,
+}: CustomTooltipProps & { payload?: { payload: ChartData }[] }) => {
   if (active && payload && payload.length > 0 && data) {
-    const itemData = payload[0]?.payload;
+    const itemData = payload[0].payload;
+
     if (isChartData(itemData)) {
       const { name, value, description } = itemData;
 
@@ -167,17 +173,22 @@ function useDashboardData() {
         throw new Error("Falha na requisição da API.");
       }
 
-      const result: AIData = await response.json();
+      const result = (await response.json()) as Partial<AIData>;
 
-      if (!result || !result.dados || !result.dados.startups_por_ano) {
+      if (
+        !result ||
+        !result.dados ||
+        !Array.isArray(result.dados.startups_por_ano) ||
+        !Array.isArray(result.dados.investimento_por_estado) ||
+        !Array.isArray(result.dados.crescimento_industria)
+      ) {
         throw new Error(
           "Resposta da IA não contém a estrutura de dados esperada."
         );
       }
 
       sessionStorage.setItem("dashboard_data", JSON.stringify(result));
-
-      setData(result);
+      setData(result as AIData);
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "Erro desconhecido";
@@ -194,16 +205,13 @@ function useDashboardData() {
     const cachedData = sessionStorage.getItem("dashboard_data");
     if (cachedData) {
       try {
-        const parsedData = JSON.parse(cachedData);
+        const parsedData = JSON.parse(cachedData) as AIData;
         setData(parsedData);
         setLoading(false);
         return;
-      } catch (err: unknown) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Erro desconhecido";
+      } catch {
         console.error(
-          "Erro ao carregar dados do cache, buscando da API novamente.",
-          errorMessage
+          "Erro ao carregar dados do cache, buscando da API novamente."
         );
         sessionStorage.removeItem("dashboard_data");
       }
@@ -248,7 +256,6 @@ export default function DashboardPage() {
     startupData,
     industryGrowthData,
     investmentByState,
-    aiResponse,
     loading,
     error,
     progress,
@@ -377,7 +384,19 @@ export default function DashboardPage() {
               </div>
 
               <div className="lg:col-span-2">
-                <BrazilMap data={investmentByState} />
+                <BrazilMap
+                  data={investmentByState.map((item) => ({
+                    state: item.state,
+                    public:
+                      item.status === "public"
+                        ? item.investment_million_brl
+                        : 0,
+                    private:
+                      item.status === "private"
+                        ? item.investment_million_brl
+                        : 0,
+                  }))}
+                />
               </div>
               <div className="lg:col-span-1">
                 <InvestmentBarCharts data={investmentByState} />
@@ -391,7 +410,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="lg:col-span-3">
-                <AIResponseCard responseText={aiResponse} />
+                <AIResponseCard />
               </div>
             </div>
           </div>

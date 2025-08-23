@@ -6,6 +6,7 @@ import type { TooltipProps } from "recharts";
 import type {
   NameType,
   ValueType,
+  Payload,
 } from "recharts/types/component/DefaultTooltipContent";
 
 interface ChartData {
@@ -14,7 +15,6 @@ interface ChartData {
   color?: string;
   description?: string;
 }
-
 interface Dataset {
   title: string;
   data: ChartData[];
@@ -28,28 +28,38 @@ const DEFAULT_COLORS = [
   "#4285F4",
   "#FBBC04",
 ];
-
 interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
   data?: ChartData[];
+  payload?: Payload<ValueType, NameType>[];
 }
 
+const isChartData = (obj: unknown): obj is ChartData => {
+  return (
+    typeof obj === "object" && obj !== null && "name" in obj && "value" in obj
+  );
+};
+
 const CustomTooltip = ({ active, payload, data }: CustomTooltipProps) => {
-  if (active && payload && payload.length && data) {
-    const { name, value, description } = payload[0].payload as ChartData;
+  if (active && payload && payload.length > 0 && data) {
+    const itemData = payload[0]?.payload;
+    if (isChartData(itemData)) {
+      const { name, value, description } = itemData;
+      const total = data.reduce((acc, curr) => acc + curr.value, 0);
+      const percentage = total > 0 ? (value / total) * 100 : 0;
 
-    const total = data.reduce((acc, curr) => acc + curr.value, 0);
-    const percentage = total > 0 ? (value / total) * 100 : 0;
-
-    return (
-      <div className="bg-white p-3 border border-gray-200 shadow-md rounded-lg text-sm">
-        <p className="font-bold text-gray-800">{name}</p>
-        <p className="text-gray-600 mt-1">Valor: {value}</p>
-        <p className="text-gray-600">Porcentagem: {Math.round(percentage)}%</p>
-        {description && (
-          <p className="text-gray-500 text-xs mt-2">{description}</p>
-        )}
-      </div>
-    );
+      return (
+        <div className="bg-white p-3 border border-gray-200 shadow-md rounded-lg text-sm">
+          <p className="font-bold text-gray-800">{name}</p>
+          <p className="text-gray-600 mt-1">Valor: {value}</p>
+          <p className="text-gray-600">
+            Porcentagem: {Math.round(percentage)}%
+          </p>
+          {description && (
+            <p className="text-gray-500 text-xs mt-2">{description}</p>
+          )}
+        </div>
+      );
+    }
   }
   return null;
 };
@@ -85,8 +95,7 @@ const StartupComparisonCharts: React.FC = () => {
         setLoading(false);
         return;
       } catch (err: unknown) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Erro desconhecido";
+        const errorMessage = err instanceof Error ? err.message : "Erro desconhecido";
         console.error(
           "Erro ao carregar dados do cache, buscando da API novamente.",
           errorMessage
@@ -111,8 +120,7 @@ const StartupComparisonCharts: React.FC = () => {
         );
         setError(null);
       } catch (err: unknown) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Erro desconhecido";
+        const errorMessage = err instanceof Error ? err.message : "Erro desconhecido";
         console.error("Erro na requisição da API:", errorMessage);
         setError("Erro inesperado");
       } finally {
