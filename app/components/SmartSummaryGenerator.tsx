@@ -11,6 +11,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import ReactMarkdown from "react-markdown";
+import { RefreshCcw, Brain } from "lucide-react";
 
 interface StartupData {
   year: string;
@@ -19,7 +20,7 @@ interface StartupData {
 
 interface IndustryGrowthData {
   year: string;
-  value: number;
+  value_percent: number;
 }
 
 interface InvestmentByState {
@@ -47,14 +48,13 @@ export default function SmartSummaryGenerator({
   async function generateSummary() {
     setLoading(true);
     setError(null);
-    setIsOpen(false); 
+    setIsOpen(false);
 
     try {
       const cachedSummary = sessionStorage.getItem("smart_summary_cache");
       if (cachedSummary) {
         setSummary(cachedSummary);
         setIsOpen(true);
-        setLoading(false);
         return;
       }
 
@@ -68,7 +68,10 @@ export default function SmartSummaryGenerator({
         }),
       });
 
-      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
+      }
 
       const data = await response.json();
       const newSummary = data.resumo || "Nenhum resumo disponível.";
@@ -77,8 +80,13 @@ export default function SmartSummaryGenerator({
 
       setSummary(newSummary);
       setIsOpen(true);
-    } catch (err) {
-      setError("Erro ao gerar resumo inteligente.");
+    } catch (err: unknown) {
+      console.error("Erro ao gerar resumo inteligente:", err);
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Erro desconhecido ao gerar resumo inteligente.";
+      setError(errorMessage);
       setIsOpen(true);
     } finally {
       setLoading(false);
@@ -93,15 +101,20 @@ export default function SmartSummaryGenerator({
 
   return (
     <div className="mt-4">
-      <Button onClick={generateSummary} disabled={loading}>
-        {loading ? "Gerando resumo..." : "Gerar resumo inteligente"}
+      <Button onClick={generateSummary} disabled={loading} className="w-full">
+        {loading ? (
+          <>
+            <RefreshCcw className="animate-spin h-4 w-4 mr-2" /> Gerando...
+          </>
+        ) : (
+          <>
+            <Brain className="h-4 w-4 mr-2" /> Gerar resumo inteligente
+          </>
+        )}
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent
-          className="max-w-4xl w-full max-h-[80vh] rounded-lg p-6 bg-white shadow-lg
-          flex flex-col"
-        >
+        <DialogContent className="max-w-4xl w-full max-h-[80vh] rounded-lg p-6 bg-white shadow-lg flex flex-col">
           <DialogHeader>
             <DialogTitle>Resumo Inteligente</DialogTitle>
           </DialogHeader>

@@ -26,11 +26,12 @@ export async function GET() {
       );
     }
     return NextResponse.json({ crescimentoIndustria: data });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Erro no processamento da API da indústria:", err);
-    return NextResponse.json(
-      { error: "Falha interna no servidor. Verifique a API da IA." },
-      { status: 500 }
-    );
+    const errorMessage =
+      err instanceof Error
+        ? err.message
+        : "Falha interna no servidor. Verifique a API da IA.";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

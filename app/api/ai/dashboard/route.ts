@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateAIDataWithSchema } from "../../../../lib/ai";
 
-export async function POST(req: Request) {
+export async function POST() {
   try {
     const schema = {
       type: "OBJECT",
@@ -28,8 +28,8 @@ export async function POST(req: Request) {
                 type: "OBJECT",
                 properties: {
                   state: { type: "STRING" },
-                  public: { type: "NUMBER" }, 
-                  private: { type: "NUMBER" }, 
+                  public: { type: "NUMBER" },
+                  private: { type: "NUMBER" },
                 },
                 propertyOrdering: ["state", "public", "private"],
               },
@@ -71,11 +71,12 @@ export async function POST(req: Request) {
       );
     }
     return NextResponse.json(data);
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("Erro no processamento da API de dashboard:", err);
-    return NextResponse.json(
-      { error: "Falha interna no servidor. Verifique a API da IA." },
-      { status: 500 }
-    );
+    const errorMessage =
+      err instanceof Error
+        ? err.message
+        : "Falha interna no servidor. Verifique a API da IA.";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
