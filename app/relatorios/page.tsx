@@ -1,9 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AsideSidebar from "../components/AsideSidebar";
-import { BarChart, LineChart, PieChart } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   LineChart as ReLineChart,
   Line,
@@ -12,19 +9,91 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  BarChart,
+  Bar,
+  Legend,
 } from "recharts";
-import InvestmentBarCharts from "../components/InvestmentBarCharts";
+import {
+  BarChart as BarChartIcon,
+  LineChart as LineChartIcon,
+  PieChart as PieChartIcon,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const ChartCard = ({ title, children }) => (
+interface StartupData {
+  year: string;
+  count: number;
+}
+
+interface InvestmentData {
+  state: string;
+  public: number;
+  private: number;
+}
+
+interface ChartCardProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+
+const ChartCard = ({ title, children }: ChartCardProps) => (
   <div className="bg-white rounded-xl shadow-lg p-6 transition-transform duration-300 hover:scale-[1.01]">
     <h2 className="text-xl font-semibold text-gray-700 mb-4">{title}</h2>
     {children}
   </div>
 );
 
+
+const InvestmentBarCharts = ({ data }: { data: InvestmentData[] }) => {
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <BarChart
+        data={data}
+        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+      >
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke="#e5e7eb"
+          vertical={false}
+        />
+        <XAxis dataKey="state" stroke="#6b7280" />
+        <YAxis stroke="#6b7280" />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: "#f9fafb",
+            borderRadius: 8,
+            border: "none",
+          }}
+          labelStyle={{ color: "#374151", fontWeight: 600 }}
+        />
+        <Legend />
+        <Bar dataKey="public" fill="#3b82f6" name="Público" />
+        <Bar dataKey="private" fill="#10b981" name="Privado" />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+};
+
+
+const AsideSidebar = () => (
+  <aside className="fixed top-0 left-0 w-20 h-full bg-white shadow-lg p-4 flex flex-col items-center justify-between border-r border-gray-200 z-40">
+  
+    <div className="text-blue-500 font-bold text-2xl">A</div>
+    <nav className="flex flex-col gap-4">
+
+      <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+      <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+    </nav>
+    <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+  </aside>
+);
+
 export default function RelatoriosPage() {
-  const [startupData, setStartupData] = useState([]);
-  const [investimentoData, setInvestimentoData] = useState([]);
+  const [startupData, setStartupData] = useState<StartupData[]>([]);
+  const [investimentoData, setInvestimentoData] = useState<InvestmentData[]>(
+    []
+  );
   const [isDesktop, setIsDesktop] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -32,20 +101,23 @@ export default function RelatoriosPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/api/ai/relatorios");
+      const response = await fetch(
+        "/api/ai/relatorios"
+      );
       if (!response.ok) {
         throw new Error("Falha na requisição da API de relatórios.");
       }
       const data = await response.json();
 
-      const startupsParsed = (data.startupsPorAno || []).map((item) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const startupsParsed = (data.startupsPorAno || []).map((item: any) => ({
         ...item,
         year: String(item.year),
       }));
 
       sessionStorage.setItem("relatorios_data", JSON.stringify(data));
 
-      setStartupData(startupsParsed); 
+      setStartupData(startupsParsed);
       setInvestimentoData(data.investimentoPorEstado || []);
     } catch (err) {
       console.error("Erro ao buscar dados:", err);
@@ -62,13 +134,13 @@ export default function RelatoriosPage() {
         setStartupData(parsedData.startupsPorAno || []);
         setInvestimentoData(parsedData.investimentoPorEstado || []);
         setLoading(false);
-        return; 
+        return;
       } catch (e) {
         console.error(
           "Erro ao carregar dados do cache, buscando da API novamente.",
           e
         );
-        sessionStorage.removeItem("relatorios_data"); 
+        sessionStorage.removeItem("relatorios_data");
       }
     }
 
@@ -79,7 +151,7 @@ export default function RelatoriosPage() {
     const mediaQuery = window.matchMedia("(min-width: 768px)");
     setIsDesktop(mediaQuery.matches);
 
-    const handler = (e) => {
+    const handler = (e: MediaQueryListEvent) => {
       setIsDesktop(e.matches);
       if (e.matches) setDrawerOpen(false);
     };
@@ -185,11 +257,11 @@ export default function RelatoriosPage() {
               </button>
             </div>
           </section>
-          
+
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 bg-gradient-to-br from-blue-50 to-blue-200 border-none">
               <CardHeader className="flex items-center gap-3">
-                <BarChart className="text-blue-600 w-6 h-6" />
+                <BarChartIcon className="text-blue-600 w-6 h-6" />
                 <CardTitle className="text-lg font-medium text-gray-800">
                   Startups Recentes
                 </CardTitle>
@@ -206,7 +278,7 @@ export default function RelatoriosPage() {
 
             <Card className="shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 bg-gradient-to-br from-green-50 to-green-200 border-none">
               <CardHeader className="flex items-center gap-3">
-                <PieChart className="text-green-600 w-6 h-6" />
+                <PieChartIcon className="text-green-600 w-6 h-6" />
                 <CardTitle className="text-lg font-medium text-gray-800">
                   Maior Investimento
                 </CardTitle>
@@ -223,7 +295,7 @@ export default function RelatoriosPage() {
 
             <Card className="shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 bg-gradient-to-br from-red-50 to-red-200 border-none">
               <CardHeader className="flex items-center gap-3">
-                <LineChart className="text-red-600 w-6 h-6" />
+                <LineChartIcon className="text-red-600 w-6 h-6" />
                 <CardTitle className="text-lg font-medium text-gray-800">
                   Estados mapeados
                 </CardTitle>
