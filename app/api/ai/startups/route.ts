@@ -3,7 +3,7 @@ import { generateAIDataWithSchema } from "../../../../lib/ai";
 
 export async function GET() {
   const prompt =
-    "Gere dados fictícios sobre o número de startups por ano no Brasil para um relatório. Inclua anos de 2018 a 2025 e categorize como 'histórico' ou 'projeção'.";
+    "Gere dados sobre o número de startups por ano no Brasil para um relatório. Inclua anos de 2018 a 2025 e categorize como 'histórico' ou 'projeção'.";
   const schema = {
     type: "ARRAY",
     items: {
@@ -26,10 +26,12 @@ export async function GET() {
       );
     }
     return NextResponse.json({ startupsPorAno: data });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Erro no processamento da API de startups:", err);
+    // Verificação de tipo para acessar a propriedade 'message'
+    const errorMessage = err instanceof Error ? err.message : "Erro inesperado";
     return NextResponse.json(
-      { error: "Falha interna no servidor. Verifique a API da IA." },
+      { error: `Falha interna no servidor: ${errorMessage}` },
       { status: 500 }
     );
   }

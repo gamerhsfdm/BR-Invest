@@ -33,10 +33,14 @@ export async function GET() {
     }));
 
     return NextResponse.json({ investimentoPorEstado });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Erro no processamento da API de investimento:", err);
+    const errorMessage =
+      err instanceof Error
+        ? err.message
+        : "Erro inesperado ao processar a API.";
     return NextResponse.json(
-      { error: "Falha interna no servidor. Verifique a API da IA." },
+      { error: `Falha interna no servidor: ${errorMessage}` },
       { status: 500 }
     );
   }

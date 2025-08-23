@@ -1,35 +1,35 @@
 import { NextResponse } from "next/server";
-import { generateAIData } from "../../../../lib/ai";
+import { generateAIDataWithSchema } from "../../../../lib/ai";
 
 export async function GET() {
+  const prompt =
+    "Gere dados de investimento e crescimento de startups no Brasil.";
+  const schema = {
+    type: "OBJECT",
+    properties: {
+      investimento_por_estado: {
+        type: "OBJECT",
+        additionalProperties: {
+          type: "INTEGER",
+        },
+      },
+    },
+  };
+
   try {
-    const rawData = await generateAIData(
-      "Gere dados de investimento e crescimento de startups no Brasil."
-    );
-    if (!Array.isArray(rawData) || rawData.length === 0) {
+    const rawData = await generateAIDataWithSchema(prompt, schema);
+    if (!rawData || !rawData.investimento_por_estado) {
       console.error(
-        "A função generateAIData não retornou um array de dados válido."
+        "A função generateAIDataWithSchema não retornou dados de investimento válidos."
       );
       return NextResponse.json(
         { error: "Dados indisponíveis da IA." },
         { status: 500 }
       );
     }
-    const investmentByStateMap: { [key: string]: number } = {};
 
-    rawData.forEach((item: any) => {
-      if (item.investimento_por_estado) {
-        Object.entries(item.investimento_por_estado).forEach(
-          ([state, value]) => {
-            if (typeof value === "number") {
-              investmentByStateMap[state] =
-                (investmentByStateMap[state] || 0) + value;
-            }
-          }
-        );
-      }
-    });
-    const finalData = Object.entries(investmentByStateMap).map(
+
+    const finalData = Object.entries(rawData.investimento_por_estado).map(
       ([state, investment_million_brl]) => ({
         state,
         investment_million_brl,
@@ -37,11 +37,10 @@ export async function GET() {
     );
 
     return NextResponse.json(finalData);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Erro no processamento da API de dados-por-estado:", err);
-    return NextResponse.json(
-      { error: "Falha interna no servidor." },
-      { status: 500 }
-    );
+    const errorMessage =
+      err instanceof Error ? err.message : "Falha interna no servidor.";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
