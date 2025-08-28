@@ -21,13 +21,13 @@ interface Dataset {
 }
 
 const DEFAULT_COLORS = [
-  "#1A73E8",
-  "#EA4335",
-  "#F7B500",
-  "#34A853",
-  "#4285F4",
-  "#FBBC04",
+  "#8ecae6", 
+  "#219ebc", 
+  "#023047", 
+  "#ffb703", 
+  "#fb8500", 
 ];
+
 interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
   data?: ChartData[];
   payload?: Payload<ValueType, NameType>[];
@@ -95,7 +95,8 @@ const StartupComparisonCharts: React.FC = () => {
         setLoading(false);
         return;
       } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : "Erro desconhecido";
+        const errorMessage =
+          err instanceof Error ? err.message : "Erro desconhecido";
         console.error(
           "Erro ao carregar dados do cache, buscando da API novamente.",
           errorMessage
@@ -120,7 +121,8 @@ const StartupComparisonCharts: React.FC = () => {
         );
         setError(null);
       } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : "Erro desconhecido";
+        const errorMessage =
+          err instanceof Error ? err.message : "Erro desconhecido";
         console.error("Erro na requisição da API:", errorMessage);
         setError("Erro inesperado");
       } finally {

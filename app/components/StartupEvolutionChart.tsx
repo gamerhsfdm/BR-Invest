@@ -83,7 +83,7 @@ export function StartupEvolutionChart({ data }: StartupEvolutionChartProps) {
             iconType="circle"
             iconSize={10}
             formatter={(value) => (
-              <span style={{ color: "#4F46E5", fontWeight: 600, fontSize: 12 }}>
+              <span style={{ color: "#219ebc", fontWeight: 600, fontSize: 12 }}>
                 {value}
               </span>
             )}
@@ -92,7 +92,7 @@ export function StartupEvolutionChart({ data }: StartupEvolutionChartProps) {
           <Bar
             dataKey="count"
             name="Número de startups"
-            fill="#4F46E5"
+            fill="#219ebc"
             radius={[8, 8, 0, 0]}
             barSize={32}
             animationDuration={900}

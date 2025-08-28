@@ -15,8 +15,8 @@ import SmartSummaryGenerator from "./SmartSummaryGenerator";
 
 interface IndustryGrowthData {
   year: string;
-  value_percent: number; 
-  status: string; 
+  value_percent: number;
+  status: string;
 }
 
 interface IndustryGrowthChartProps {
@@ -41,8 +41,8 @@ export default function IndustryGrowthChart({
   const industryDataForSummary: IndustryGrowthData[] = industryGrowthData.map(
     (item) => ({
       year: item.year,
-      value_percent: item.value_percent, 
-      status: item.status || "",         
+      value_percent: item.value_percent,
+      status: item.status || "",
     })
   );
 
@@ -73,8 +73,8 @@ export default function IndustryGrowthChart({
             >
               <defs>
                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.9} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.2} />
+                  <stop offset="5%" stopColor="#8ecae6" stopOpacity={0.9} />
+                  <stop offset="95%" stopColor="#219ebc" stopOpacity={0.2} />
                 </linearGradient>
               </defs>
 
@@ -85,12 +85,12 @@ export default function IndustryGrowthChart({
               />
               <XAxis
                 dataKey="year"
-                tick={{ fill: "#6b7280", fontSize: 14, fontWeight: 600 }}
+                tick={{ fill: "#023047", fontSize: 14, fontWeight: 600 }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fill: "#6b7280", fontSize: 14 }}
+                tick={{ fill: "#023047", fontSize: 14 }}
                 tickFormatter={(value) => `${value}%`}
                 domain={[0, domainMax]}
                 axisLine={false}
@@ -115,7 +115,7 @@ export default function IndustryGrowthChart({
                 iconType="circle"
                 iconSize={12}
                 formatter={(value) => (
-                  <span style={{ color: "#4F46E5", fontWeight: 600 }}>
+                  <span style={{ color: "#219ebc", fontWeight: 600 }}>
                     {value}
                   </span>
                 )}
@@ -125,12 +125,13 @@ export default function IndustryGrowthChart({
                 type="monotone"
                 dataKey="value_percent"
                 name="Crescimento (%)"
-                stroke="#6366f1"
+                stroke="#219ebc"
                 strokeWidth={3.5}
                 fill="url(#colorValue)"
                 activeDot={{ r: 7, stroke: "#fff", strokeWidth: 3 }}
-                dot={{ r: 4, strokeWidth: 2, fill: "#fff", stroke: "#6366f1" }}
+                dot={{ r: 4, strokeWidth: 2, fill: "#fff", stroke: "#219ebc" }}
                 isAnimationActive={true}
+                animationDuration={500}
               />
             </AreaChart>
           </ResponsiveContainer>

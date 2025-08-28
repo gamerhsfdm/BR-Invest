@@ -101,7 +101,7 @@ export default function SmartSummaryGenerator({
 
   return (
     <div className="mt-4">
-      <Button onClick={generateSummary} disabled={loading} className="w-full">
+      <Button onClick={generateSummary} disabled={loading} className="w-full bg-[#219ebc] hover:bg-[#1e89a5] text-white">
         {loading ? (
           <>
             <RefreshCcw className="animate-spin h-4 w-4 mr-2" /> Gerando...

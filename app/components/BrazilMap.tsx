@@ -24,12 +24,14 @@ interface GeographyProperties {
 type GeographyFeature = Feature<Geometry, GeographyProperties>;
 
 const normalizeName = (str: string) =>
-  str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 
 const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
   const [selectedState, setSelectedState] = useState<string | null>(null);
 
-  
   const dataByState: Record<string, { investimento: string }> = {};
   data.forEach((item) => {
     if (!item.state || item.public === undefined || item.private === undefined)
@@ -42,24 +44,55 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
   });
 
   const stateColors: Record<string, string> = {
-    "sao paulo": "#1f4ed8",
-    "minas gerais": "#1f4ed8",
-    "rio de janeiro": "#1f4ed8",
-    bahia: "#1f4ed8",
-    "espirito santo": "#1f4ed8",
-    "rio grande do sul": "#ea580c",
-    parana: "#ea580c",
-    "santa catarina": "#ea580c",
-    goias: "#ea580c",
-    "distrito federal": "#ea580c",
-    pernambuco: "#ea580c",
+    "sao paulo": "#8ecae6",
+    "minas gerais": "#8ecae6",
+    "rio de janeiro": "#8ecae6",
+    bahia: "#8ecae6",
+    "espirito santo": "#8ecae6",
+    "rio grande do sul": "#ffb703",
+    parana: "#ffb703",
+    "santa catarina": "#ffb703",
+    goias: "#ffb703",
+    "distrito federal": "#ffb703",
+    pernambuco: "#ffb703",
+    alagoas: "#219ebc",
+    sergipe: "#219ebc",
+    "rio grande do norte": "#219ebc",
+    paraiba: "#219ebc",
+    ceara: "#219ebc",
+    piaui: "#219ebc",
+    maranhao: "#219ebc",
+    tocantins: "#219ebc",
+    para: "#219ebc",
+    amapa: "#219ebc",
+    roraima: "#219ebc",
+    amazonas: "#219ebc",
+    acre: "#219ebc",
+    rondonia: "#219ebc",
+    "mato grosso": "#219ebc",
+    "mato grosso do sul": "#219ebc",
   };
 
-  
+  const defaultFill = "#fb8500";
+  const defaultStroke = "#fff";
+  const hoverFill = "#023047";
+  const pressedFill = "#023047";
+
   const geographyStyle = {
-    default: { outline: "none", cursor: "pointer" },
-    hover: { fill: "#0ea5e9", outline: "none" },
-    pressed: { fill: "#0ea5e9", outline: "none" },
+    default: {
+      outline: "none",
+      cursor: "pointer",
+      stroke: defaultStroke,
+      strokeWidth: 0.5,
+    },
+    hover: {
+      fill: hoverFill,
+      outline: "none",
+    },
+    pressed: {
+      fill: pressedFill,
+      outline: "none",
+    },
   };
 
   return (
@@ -70,16 +103,32 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
 
       <div className="flex flex-wrap gap-6 mb-6 text-sm text-muted-foreground justify-center">
         <div className="flex items-center gap-2">
-          <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#1f4ed8" }} />
+          <span
+            className="w-4 h-4 rounded-full"
+            style={{ backgroundColor: "#8ecae6" }}
+          />
           Sudeste
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#ea580c" }} />
+          <span
+            className="w-4 h-4 rounded-full"
+            style={{ backgroundColor: "#ffb703" }}
+          />
           Sul / Centro-Oeste
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#16a34a" }} />
-          Outros
+          <span
+            className="w-4 h-4 rounded-full"
+            style={{ backgroundColor: "#219ebc" }}
+          />
+          Norte / Nordeste
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className="w-4 h-4 rounded-full"
+            style={{ backgroundColor: "#fb8500" }}
+          />
+          Sem dados
         </div>
       </div>
 
@@ -92,18 +141,17 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
           <Geographies geography={geoUrl}>
             {({ geographies }) =>
               geographies.map((geo) => {
-              
                 const geoTyped = geo as GeographyFeature & { rsmKey: string };
                 const name = geoTyped.properties.name;
                 const normalizedName = normalizeName(name);
-                const fill = stateColors[normalizedName] || "#16a34a";
+                const fill = stateColors[normalizedName] || defaultFill;
 
                 return (
                   <Geography
                     key={geoTyped.rsmKey}
                     geography={geoTyped}
                     fill={fill}
-                    stroke="#fff"
+                    stroke={defaultStroke}
                     strokeWidth={0.5}
                     onClick={() => setSelectedState(normalizedName)}
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -119,10 +167,13 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
 
       {selectedState && (
         <div className="mt-6 bg-gray-50 rounded-xl p-4 shadow w-full text-sm text-gray-800 border">
-          <h4 className="font-semibold text-base mb-2 capitalize">{selectedState}</h4>
+          <h4 className="font-semibold text-base mb-2 capitalize">
+            {selectedState}
+          </h4>
           {dataByState[selectedState] ? (
             <p>
-              <strong>Investimento:</strong> {dataByState[selectedState].investimento}
+              <strong>Investimento:</strong>{" "}
+              {dataByState[selectedState].investimento}
             </p>
           ) : (
             <p>Sem dados disponíveis para este estado.</p>

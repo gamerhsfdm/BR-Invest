@@ -55,12 +55,11 @@ interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
 }
 
 const DEFAULT_COLORS = [
-  "#1A73E8",
-  "#EA4335",
-  "#F7B500",
-  "#34A853",
-  "#4285F4",
-  "#FBBC04",
+  "#219ebc", 
+  "#ffb703", 
+  "#fb8500", 
+  "#023047", 
+  "#8ecae6", 
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -285,7 +284,7 @@ export default function DashboardPage() {
       {loading && (
         <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
           <div
-            className="h-1 bg-blue-500 transition-all duration-300"
+            className="h-1 bg-[#219ebc] transition-all duration-300"
             style={{ width: `${progress}%` }}
           ></div>
         </div>
@@ -317,7 +316,7 @@ export default function DashboardPage() {
               <button
                 onClick={refreshData}
                 disabled={loading}
-                className="flex items-center space-x-2 px-4 py-2 mt-4 sm:mt-0 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="flex items-center space-x-2 px-4 py-2 mt-4 sm:mt-0 bg-[#ffb703] text-white rounded-lg shadow-md hover:bg-[#a8811c] transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>

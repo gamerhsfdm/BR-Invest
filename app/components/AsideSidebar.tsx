@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import {
   Sheet,
   SheetTrigger,
@@ -9,11 +8,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { BarChart2, TrendingUp, Bot, Menu } from "lucide-react";
 
 const menuItems = [
-  { icon: "📊", label: "Dashboard", href: "/" },
-  { icon: "📈", label: "Relatórios", href: "/relatorios" },
-  { icon: "🤖", label: "Perguntar", href: "/perguntar" },
+  { icon: BarChart2, label: "Dashboard", href: "/" },
+  { icon: TrendingUp, label: "Relatórios", href: "/relatorios" },
+  { icon: Bot, label: "Perguntar", href: "/perguntar" },
 ];
 
 interface AsideSidebarProps {
@@ -52,15 +52,15 @@ export default function AsideSidebar({ onChangeDesktop }: AsideSidebarProps) {
     return (
       <aside className="fixed top-0 left-0 h-full w-20 bg-white border-r border-gray-200 shadow-lg flex flex-col p-6 pt-8 z-50 rounded-r-xl">
         <nav className="flex flex-col space-y-6 items-center justify-center flex-grow">
-          {menuItems.map(({ icon, label, href }) => (
-            <Link
+          {menuItems.map(({ icon: Icon, label, href }) => (
+            <a
               key={label}
               href={href}
-              className="flex justify-center items-center w-12 h-12 rounded-lg hover:bg-indigo-100 transition-colors text-gray-700 cursor-pointer select-none text-3xl"
+              className="flex justify-center items-center w-12 h-12 rounded-lg hover:bg-indigo-100 transition-colors text-gray-700 cursor-pointer select-none"
               aria-label={label}
             >
-              {icon}
-            </Link>
+              <Icon size={32} />
+            </a>
           ))}
         </nav>
       </aside>
@@ -73,17 +73,7 @@ export default function AsideSidebar({ onChangeDesktop }: AsideSidebarProps) {
           aria-label="Abrir menu"
           className="fixed top-5 left-4 z-50 p-3 bg-white rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
-          <svg
-            className="w-7 h-7 text-indigo-600"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M3 12h18M3 6h18M3 18h18" />
-          </svg>
+          <Menu className="w-7 h-7 text-indigo-600" />
         </button>
       </SheetTrigger>
 
@@ -96,15 +86,15 @@ export default function AsideSidebar({ onChangeDesktop }: AsideSidebarProps) {
         </SheetHeader>
 
         <nav className="flex flex-col space-y-4 mt-4">
-          {menuItems.map(({ icon, label, href }) => (
-            <Link
+          {menuItems.map(({ icon: Icon, label, href }) => (
+            <a
               key={label}
               href={href}
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-indigo-100 transition-colors text-gray-700 text-lg"
             >
-              <span className="text-2xl">{icon}</span>
+              <Icon size={24} />
               <span>{label}</span>
-            </Link>
+            </a>
           ))}
         </nav>
       </SheetContent>
