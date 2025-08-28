@@ -21,7 +21,7 @@ Com o BRInvest, você pode:
 A nossa dashboard oferece uma visão geral clara e concisa do ecossistema de startups e investimentos no Brasil. Visualize dados importantes de forma rápida e eficiente.
 
 <p align="center">
-  <img src="./dashboard.png" alt="Dashboard do BRInvest" width="800">
+  <img src="./app/dashboard.png" alt="Dashboard do BRInvest" width="800">
 </p>
 <p align="center"><em>Visão geral da dashboard principal.</em></p>
 
@@ -30,7 +30,7 @@ A nossa dashboard oferece uma visão geral clara e concisa do ecossistema de sta
 Gere relatórios personalizados com insights aprofundados sobre setores específicos, tendências de investimento e o desempenho de startups.
 
 <p align="center">
-  <img src="./relatorio.png" alt="Exemplo de Relatório Gerado" width="800">
+  <img src="./app/relatorio.png" alt="Exemplo de Relatório Gerado" width="800">
 </p>
 <p align="center"><em>Um exemplo de relatório detalhado com análises e gráficos.</em></p>
 
@@ -39,7 +39,7 @@ Gere relatórios personalizados com insights aprofundados sobre setores específ
 Utilize nossa interface intuitiva para fazer perguntas diretamente à IA e obter insights personalizados sobre o mercado de investimentos e startups.
 
 <p align="center">
-  <img src="./ia_pergunta.png" alt="Interface de Pergunta para a IA" width="800">
+  <img src="./app/ia_pergunta.png" alt="Interface de Pergunta para a IA" width="800">
 </p>
 <p align="center"><em>Faça perguntas e receba respostas inteligentes da nossa IA.</em></p>
 
