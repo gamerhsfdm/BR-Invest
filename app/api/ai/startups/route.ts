@@ -28,7 +28,6 @@ export async function GET() {
     return NextResponse.json({ startupsPorAno: data });
   } catch (err: unknown) {
     console.error("Erro no processamento da API de startups:", err);
-    // Verificação de tipo para acessar a propriedade 'message'
     const errorMessage = err instanceof Error ? err.message : "Erro inesperado";
     return NextResponse.json(
       { error: `Falha interna no servidor: ${errorMessage}` },

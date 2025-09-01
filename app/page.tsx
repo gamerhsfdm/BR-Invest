@@ -54,13 +54,7 @@ interface CustomTooltipProps extends TooltipProps<ValueType, NameType> {
   data?: ChartData[];
 }
 
-const DEFAULT_COLORS = [
-  "#219ebc", 
-  "#ffb703", 
-  "#fb8500", 
-  "#023047", 
-  "#8ecae6", 
-];
+const DEFAULT_COLORS = ["#219ebc", "#ffb703", "#fb8500", "#023047", "#8ecae6"];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isChartData = (obj: any): obj is ChartData => {
@@ -368,6 +362,35 @@ export default function DashboardPage() {
                 )}
               </button>
             </header>
+
+            <div
+              className="bg-gray-100 border-l-4 border-gray-400 text-gray-700 p-4 rounded-lg shadow-md flex items-center space-x-3"
+              role="alert"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 text-gray-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <div>
+                <p className="font-bold">Aviso sobre os dados:</p>
+                <p className="text-sm">
+                  As informações apresentadas, especialmente as projeções para
+                  2024 e 2025, são baseadas em relatórios de mercado e análise
+                  de tendências. Esses dados servem como uma referência e podem
+                  não refletir a realidade exata do futuro do mercado.
+                </p>
+              </div>
+            </div>
 
             <p className="text-gray-600 mt-2">
               Análise do crescimento das startups, investimentos e indústria no

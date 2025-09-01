@@ -53,16 +53,18 @@ export async function POST() {
             "crescimento_industria",
           ],
         },
+        fonte_dados: { type: "STRING" }, 
       },
-      propertyOrdering: ["resposta", "dados"],
+      propertyOrdering: ["resposta", "dados", "fonte_dados"],
     };
-    const data = await generateAIDataWithSchema(
-      `Gere um relatório completo sobre o cenário de startups e investimentos no Brasil. Forneça uma análise geral e os dados em formato JSON para os seguintes tópicos: 
-      1. Evolução do número de startups por ano.
-      2. Investimento por estado, discriminando valores públicos e privados.
-      3. Crescimento da indústria de tecnologia no país em porcentagem ao longo dos anos.`,
-      schema
-    );
+
+    const prompt = `Gere um relatório completo sobre o cenário de startups e investimentos no Brasil. Forneça uma análise geral e os dados em formato JSON para os seguintes tópicos, **garantindo que os dados de evolução do número de startups e de crescimento da indústria cubram o período de 2018 a 2025, com dados históricos até 2023 e projeções para 2024 e 2025**. Ao final, inclua uma string em um campo separado com os nomes das fontes de dados utilizadas, como "Distrito Dataminer", "ABVCAP" e outros relatórios de mercado de Venture Capital. **Não inclua links ou URLs, apenas os nomes das fontes.**
+
+    1. Evolução do número de startups por ano.
+    2. Investimento por estado, discriminando valores públicos e privados.
+    3. Crescimento da indústria de tecnologia no país em porcentagem ao longo dos anos.`;
+
+    const data = await generateAIDataWithSchema(prompt, schema);
 
     if (!data) {
       return NextResponse.json(

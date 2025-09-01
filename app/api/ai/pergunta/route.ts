@@ -65,10 +65,18 @@ export async function POST(req: Request) {
       propertyOrdering: ["resposta", "dados"],
     };
 
-    const data = await generateAIDataWithSchema(
-      `Gere um relatório completo sobre startups e investimentos no Brasil, incluindo uma análise geral e dados em formato JSON para os seguintes temas: evolução do número de startups por ano, investimento por estado e crescimento da indústria.`,
-      schema
-    );
+    const prompt = `
+      Analise a seguinte pergunta do usuário: "${question}"
+      
+      Se a pergunta for sobre inovação, investimentos, startups ou indústria no Brasil, gere um relatório completo, incluindo uma análise geral e os dados em formato JSON para os seguintes tópicos:
+      1. Evolução do número de startups por ano (de 2018 a 2025, com dados históricos e projeções).
+      2. Investimento por estado, com valores em BRL e status (histórico ou projeção).
+      3. Crescimento da indústria de tecnologia no Brasil em porcentagem por ano (de 2018 a 2025, com dados históricos e projeções).
+      
+      Se a pergunta não for sobre esses tópicos, responda estritamente com a seguinte frase: "Parece que sua pergunta está fora do meu escopo de atuação. Posso ajudar com informações sobre inovação, investimentos e o setor industrial no Brasil."
+    `;
+
+    const data = await generateAIDataWithSchema(prompt, schema);
 
     if (!data) {
       return NextResponse.json(
@@ -76,6 +84,15 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+
+    const aiResponse = data as { resposta?: string };
+    if (aiResponse.resposta && aiResponse.resposta.includes("Desculpe")) {
+      return NextResponse.json({
+        resposta: aiResponse.resposta,
+        dados: null,
+      });
+    }
+
     return NextResponse.json(data);
   } catch (err) {
     console.error("Erro no processamento da API de perguntas:", err);

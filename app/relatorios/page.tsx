@@ -42,12 +42,25 @@ const ChartCard = ({ title, children }: ChartCardProps) => (
   </div>
 );
 
+const formatYAxis = (tickItem: number): string => {
+  if (tickItem >= 1000000000) {
+    return `${(tickItem / 1000000000).toFixed(1)}B`;
+  }
+  if (tickItem >= 1000000) {
+    return `${(tickItem / 1000000).toFixed(1)}M`;
+  }
+  if (tickItem >= 1000) {
+    return `${(tickItem / 1000).toFixed(1)}K`;
+  }
+  return String(tickItem); 
+};
+
 const InvestmentBarCharts = ({ data }: { data: InvestmentData[] }) => (
   <ResponsiveContainer width="100%" height={300}>
     <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
       <XAxis dataKey="state" stroke="#023047" />
-      <YAxis stroke="#023047" />
+      <YAxis stroke="#023047" tickFormatter={formatYAxis} />
       <Tooltip
         contentStyle={{
           backgroundColor: "#f9fafb",
@@ -55,6 +68,7 @@ const InvestmentBarCharts = ({ data }: { data: InvestmentData[] }) => (
           border: "none",
         }}
         labelStyle={{ color: "#023047", fontWeight: 600 }}
+        formatter={(value: number) => `${value.toLocaleString("pt-BR")} BRL`}
       />
       <Legend />
       <Bar dataKey="public" fill="#219ebc" name="Público" />

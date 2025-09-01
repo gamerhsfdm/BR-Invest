@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -21,34 +22,27 @@ interface InvestmentBarChartsProps {
   data: RawInvestmentData[];
 }
 
-const formatCurrency = (
-  value: number | string | undefined | (string | number)[]
-) => {
-  let numericValue: number;
-  if (Array.isArray(value)) {
-    numericValue = typeof value[0] === "number" ? value[0] : 0;
-  } else if (typeof value === "number") {
-    numericValue = value;
-  } else {
-    return "R$ 0";
+const formatYAxisCurrency = (value: number): string => {
+  if (value >= 1000000000) {
+    return `R$ ${(value / 1000000000).toFixed(1).replace(".", ",")}B`;
   }
+  if (value >= 1000000) {
+    return `R$ ${(value / 1000000).toFixed(1).replace(".", ",")}M`;
+  }
+  if (value >= 1000) {
+    return `R$ ${(value / 1000).toFixed(1).replace(".", ",")}K`;
+  }
+  return `R$ ${value.toLocaleString("pt-BR")}`;
+};
 
-  if (numericValue >= 1000000000) {
-    return `R$ ${(numericValue / 1000000000).toLocaleString("pt-BR", {
-      maximumFractionDigits: 1,
-    })}B`;
+const formatTooltipCurrency = (value: number | undefined): string => {
+  if (typeof value !== "number") {
+    return "R$ 0,00";
   }
-  if (numericValue >= 1000000) {
-    return `R$ ${(numericValue / 1000000).toLocaleString("pt-BR", {
-      maximumFractionDigits: 1,
-    })}M`;
-  }
-  if (numericValue >= 1000) {
-    return `R$ ${(numericValue / 1000).toLocaleString("pt-BR", {
-      maximumFractionDigits: 1,
-    })}K`;
-  }
-  return `R$ ${numericValue.toLocaleString("pt-BR")}`;
+  return `R$ ${value.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 };
 
 export default function InvestmentBarCharts({
@@ -65,11 +59,11 @@ export default function InvestmentBarCharts({
 
   const processedData = data.map((item) => ({
     state: item.state,
-    investment_million_brl: (item.public || 0) + (item.private || 0),
+    investment_brl: (item.public || 0) + (item.private || 0),
   }));
 
   const chartData = [...processedData]
-    .sort((a, b) => b.investment_million_brl - a.investment_million_brl)
+    .sort((a, b) => b.investment_brl - a.investment_brl)
     .slice(0, 10);
 
   const isEmpty = chartData.length === 0;
@@ -116,10 +110,13 @@ export default function InvestmentBarCharts({
               tickLine={false}
               tick={{ fill: "#023047", fontSize: isMobile ? 10 : 12 }}
               width={isMobile ? 60 : 80}
-              tickFormatter={formatCurrency}
+              tickFormatter={formatYAxisCurrency}
             />
             <Tooltip
-              formatter={(value) => [formatCurrency(value), "Investimento"]}
+              formatter={(value: any) => [
+                formatTooltipCurrency(value),
+                "Investimento",
+              ]}
               labelFormatter={(label) => `Estado: ${label}`}
               contentStyle={{
                 backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -134,7 +131,7 @@ export default function InvestmentBarCharts({
               itemStyle={{ color: "#219ebc" }}
             />
             <Bar
-              dataKey="investment_million_brl"
+              dataKey="investment_brl"
               name="Investimento"
               barSize={isMobile ? 18 : 24}
               radius={[6, 6, 0, 0]}
