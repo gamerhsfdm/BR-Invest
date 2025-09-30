@@ -99,11 +99,11 @@ export default function InvestmentBarCharts({
               dataKey="state"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#023047", fontSize: isMobile ? 10 : 12 }}
+              tick={{ fill: "#023047", fontSize: isMobile ? 8 : 10 }}
               interval={0}
-              angle={isMobile ? -45 : 0}
+              angle={isMobile ? -45 : -25}
               textAnchor={isMobile ? "end" : "middle"}
-              height={isMobile ? 50 : 30}
+              height={isMobile ? 50 : 50}
             />
             <YAxis
               axisLine={false}

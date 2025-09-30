@@ -2,8 +2,27 @@ import { NextResponse } from "next/server";
 import { generateAIDataWithSchema } from "../../../../lib/ai";
 
 export async function GET() {
-  const prompt =
-    "Gere dados sobre investimento (em milhões de BRL) em startups por estado no Brasil para um relatório. A resposta deve ser um objeto onde as chaves são as siglas dos estados e os valores são os investimentos.";
+const prompt = `
+Utilize apenas dados reais e fontes públicas sobre investimentos em startups no Brasil.
+
+Regras:
+1. Considere apenas os 5 estados que mais concentram investimentos.
+2. Para cada estado, utilize a sigla oficial (ex: SP, RJ, MG).
+3. A resposta deve ser exclusivamente em formato JSON válido.
+4. Cada estado deve ter duas chaves internas:
+   - "publico": valor numérico em milhões (recursos governamentais, programas de fomento, editais etc.).
+   - "privado": valor numérico em milhões (venture capital, fundos, investidores anjo etc.).
+5. Caso não exista dado separado entre público e privado para algum estado, utilize null no campo que faltar.
+6. Não inclua explicações, apenas o objeto JSON final.
+
+Exemplo de formato esperado:
+{
+  "SP": { "publico": null, "privado": 5000 },
+  "RJ": { "publico": 300, "privado": 1200 },
+  ...
+}
+`;
+
   const schema = {
     type: "OBJECT",
     properties: {
