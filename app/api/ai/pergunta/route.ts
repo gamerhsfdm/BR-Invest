@@ -11,70 +11,29 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    
     const schema = {
       type: "OBJECT",
       properties: {
         resposta: { type: "STRING" },
-        dados: {
-          type: "OBJECT",
-          properties: {
-            startups_por_ano: {
-              type: "ARRAY",
-              items: {
-                type: "OBJECT",
-                properties: {
-                  year: { type: "STRING" },
-                  count: { type: "NUMBER" },
-                  status: { type: "STRING" },
-                },
-                propertyOrdering: ["year", "count", "status"],
-              },
-            },
-            investimento_por_estado: {
-              type: "ARRAY",
-              items: {
-                type: "OBJECT",
-                properties: {
-                  state: { type: "STRING" },
-                  investment_million_brl: { type: "NUMBER" },
-                  status: { type: "STRING" },
-                },
-                propertyOrdering: ["state", "investment_million_brl", "status"],
-              },
-            },
-            crescimento_industria: {
-              type: "ARRAY",
-              items: {
-                type: "OBJECT",
-                properties: {
-                  year: { type: "STRING" },
-                  value_percent: { type: "NUMBER" },
-                  status: { type: "STRING" },
-                },
-                propertyOrdering: ["year", "value_percent", "status"],
-              },
-            },
-          },
-          propertyOrdering: [
-            "startups_por_ano",
-            "investimento_por_estado",
-            "crescimento_industria",
-          ],
-        },
       },
-      propertyOrdering: ["resposta", "dados"],
+      propertyOrdering: ["resposta"],
     };
 
     const prompt = `
-      Analise a seguinte pergunta do usuário: "${question}"
-      
-      Se a pergunta for sobre inovação, investimentos, startups ou indústria no Brasil, gere um relatório completo, incluindo uma análise geral e os dados em formato JSON para os seguintes tópicos:
-      1. Evolução do número de startups por ano (de 2018 a 2025, com dados históricos e projeções).
-      2. Investimento por estado, com valores em BRL e status (histórico ou projeção).
-      3. Crescimento da indústria de tecnologia no Brasil em porcentagem por ano (de 2018 a 2025, com dados históricos e projeções).
-      
-      Se a pergunta não for sobre esses tópicos, responda estritamente com a seguinte frase: "Parece que sua pergunta está fora do meu escopo de atuação. Posso ajudar com informações sobre inovação, investimentos e o setor industrial no Brasil."
-    `;
+Analise a seguinte pergunta do usuário: "${question}"
+
+**Escopo de atuação:**
+Responda apenas perguntas relacionadas a **inovação, investimentos, startups, tecnologia ou indústria no Brasil**, incluindo temas ligados à **ODS 9 (Indústria, Inovação e Infraestrutura)**.
+
+**Instrução de resposta dentro do escopo:**
+Se a pergunta estiver dentro desses temas, forneça uma **resposta completa, clara e informativa**, baseada no conhecimento do modelo sobre o contexto brasileiro.
+
+**Instrução de resposta fora do escopo:**
+Se a pergunta não estiver relacionada aos temas acima, responda **exatamente** com:
+"Sua pergunta está fora do meu escopo de atuação, que é focado em inovação, investimentos e o setor industrial do Brasil. Tente perguntar sobre startups, ODS 9 ou o ecossistema de tecnologia."
+`;
+
 
     const data = await generateAIDataWithSchema(prompt, schema);
 
@@ -84,15 +43,7 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
-
-    const aiResponse = data as { resposta?: string };
-    if (aiResponse.resposta && aiResponse.resposta.includes("Desculpe")) {
-      return NextResponse.json({
-        resposta: aiResponse.resposta,
-        dados: null,
-      });
-    }
-
+    
     return NextResponse.json(data);
   } catch (err) {
     console.error("Erro no processamento da API de perguntas:", err);

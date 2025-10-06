@@ -59,11 +59,19 @@ export async function POST() {
       propertyOrdering: ["resposta", "dados", "fonte_dados"],
     };
 
-    const prompt = `Gere um relatório completo sobre o cenário de startups e investimentos no Brasil. Forneça uma análise geral e os dados em formato JSON para os seguintes tópicos, **garantindo que os dados de evolução do número de startups e de crescimento da indústria cubram o período de 2018 a 2025, com dados históricos até 2023 e projeções para 2024 e 2025**. Ao final, inclua uma string em um campo separado com os nomes das fontes de dados utilizadas, como "Distrito Dataminer", "ABVCAP" e outros relatórios de mercado de Venture Capital. **Não inclua links ou URLs, apenas os nomes das fontes.**
+    const prompt = `Gere um relatório completo e conciso sobre o cenário de startups e investimentos no Brasil. A resposta deve seguir estritamente o formato JSON definido pelo schema de saída, sem qualquer texto adicional fora do campo 'resposta'.
 
-  1. Evolução do número de startups por ano.
-  2. Investimento por estado, discriminando valores públicos e privados, **em milhões de BRL**.
-  3. Crescimento da indústria de tecnologia no país em porcentagem ao longo dos anos.`;
+O relatório deve incluir:
+1. Uma **análise geral concisa** (campo 'resposta') sobre o ecossistema brasileiro, mencionando a relevância da **ODS 9 (Indústria, Inovação e Infraestrutura)** para o crescimento sustentável e tecnológico do setor.
+2. Dados detalhados (campo 'dados') para o período de **2018 a 2025**, sendo **dados históricos até 2023** e **projeções/estimativas para 2024 e 2025**.
+
+Os campos de dados devem conter:
+- **startups_por_ano**: Evolução do número de startups por ano. Use o campo 'status' para indicar 'histórico' ou 'projeção'.
+- **investimento_por_estado**: Investimento anual. Os campos 'public' e 'private' devem conter **apenas o valor numérico que representa a quantia total em milhões de BRL**.
+    - **Instrução de Unidade:** Para valores em bilhões, converta para milhões (Ex: R$ 1.500.000.000,00 deve ser **1500**). Para valores em milhões, use o valor direto (Ex: R$ 850.000.000,00 deve ser **850**).
+- **crescimento_industria**: Crescimento percentual da indústria de tecnologia do país. O campo 'value_percent' deve ser o **valor numérico percentual** (Ex: para 10.5% o valor é 10.5).
+
+O campo **fonte_dados** deve conter uma lista separada por vírgulas dos nomes das principais fontes de dados de Venture Capital e tecnologia (ex: "Distrito Dataminer, ABVCAP, Sebrae, Brasscom"). **Não inclua links ou URLs.**`;
 
     const rawData: any = await generateAIDataWithSchema(prompt, schema);
 

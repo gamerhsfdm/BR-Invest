@@ -81,7 +81,7 @@ export default function InvestmentBarCharts({
   return (
     <div className="w-full flex flex-col p-4 bg-white rounded-2xl shadow-lg border border-gray-100 h-[420px]">
       <h2 className="text-xl font-bold mb-4 text-center text-gray-800">
-        Top 10 Investimento Total por Estado
+        Top 5 Investimento Total por Estado
       </h2>
 
       <div className="flex-1">

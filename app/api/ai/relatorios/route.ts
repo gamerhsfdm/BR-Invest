@@ -1,8 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { generateAIDataWithSchema } from "../../../../lib/ai";
 
 export async function GET() {
-  const prompt = `Gere dados de startups, indústria e investimentos no Brasil para um relatório. A resposta deve ser um único objeto JSON contendo as chaves 'startupsPorAno' (array de objetos com 'year' e 'count'), 'investimentoPorEstado' (array de objetos com 'state', 'public' e 'private'), e 'crescimentoIndustria' (array de objetos com 'year' e 'value_percent'). As chaves devem seguir esse padrão: 'startupsPorAno', 'investimentoPorEstado', 'crescimentoIndustria'.`;
+  const prompt = `Gere um objeto JSON contendo dados realistas sobre o cenário de startups, indústria e investimentos no Brasil, baseados em tendências históricas (2018-2023) e projeções (2024).
+
+O objeto JSON deve ter as seguintes chaves, estritamente: 'startupsPorAno', 'investimentoPorEstado', 'crescimentoIndustria'.
+
+Detalhes dos Dados Requeridos:
+
+1. **startupsPorAno:** Array de objetos (year, count) cobrindo **2018 a 2024**. O 'count' representa o número total de startups no Brasil.
+2. **investimentoPorEstado:** Array de objetos (state, public, private) com valores em **milhões de BRL**.
+* **Instrução Crítica de Escala:** Os valores 'public' e 'private' devem ser o **número que representa a quantia em milhões de BRL**.
+ * **Exemplo de Escala (BILHÕES):** Se o investimento privado em SP foi de R$ 5 BILHÕES, o valor deve ser **5000**. Se for R$ 800 MILHÕES, o valor deve ser **800**.
+ * **Foco Realista:** Mantenha a forte concentração em SP e RJ e garanta que os valores refletem a magnitude do mercado (bilhões anuais).
+3. **crescimentoIndustria:** Array de objetos (year, value_percent) cobrindo **2018 a 2024**. O 'value_percent' representa o crescimento anual da indústria de tecnologia do país.
+
+**Instrução Extra:** Garanta que os dados de investimento reflitam a alta em 2021 e a correção nos anos seguintes.`;
 
   const schema = {
     type: "OBJECT",
@@ -47,8 +61,7 @@ export async function GET() {
   };
 
   try {
-   
-    const data = await generateAIDataWithSchema(prompt, schema);
+    const data: any = await generateAIDataWithSchema(prompt, schema);
 
     if (!data) {
       return NextResponse.json(
@@ -56,13 +69,20 @@ export async function GET() {
         { status: 500 }
       );
     }
-
-   
+    
     const parsedData = data || {};
 
+    const investimento_corrigido = (parsedData.investimentoPorEstado || []).map(
+      (item: any) => ({
+        state: item.state,
+        public: (item.public as number) * 1000000,
+        private: (item.private as number) * 1000000,
+      })
+    );
+    
     return NextResponse.json({
       startupsPorAno: parsedData.startupsPorAno || [],
-      investimentoPorEstado: parsedData.investimentoPorEstado || [],
+      investimentoPorEstado: investimento_corrigido, 
       crescimentoIndustria: parsedData.crescimentoIndustria || [],
     });
   } catch (err: unknown) {
