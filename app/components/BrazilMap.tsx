@@ -205,33 +205,44 @@ const BrazilMap: React.FC = () => {
   const selectedData = selectedState ? dataByState[selectedState] : null;
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/api/ai/dados-por-estado');
-        
-        if (!response.ok) {
-          throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const result: InvestmentByState[] = await response.json();
-        
-        if (!Array.isArray(result)) {
-            throw new Error('Formato de dados inesperado. Esperava um array.');
-        }
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
 
-        setData(result);
-      } catch (err) {
-        console.error("Falha ao carregar dados da API:", err);
-        setError('Não foi possível carregar os dados de investimento.');
-      } finally {
+    try {
+      // Primeiro, checar se já existe no localStorage
+      const cachedData = localStorage.getItem('investmentData');
+      if (cachedData) {
+        const parsedData: InvestmentByState[] = JSON.parse(cachedData);
+        setData(parsedData);
         setLoading(false);
+        return;
       }
-    };
 
-    fetchData();
-  }, []); 
+      // Caso não exista, buscar da API
+      const response = await fetch('/api/ai/dados-por-estado');
+      if (!response.ok) {
+        throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
+      }
+      const result: InvestmentByState[] = await response.json();
+
+      if (!Array.isArray(result)) {
+        throw new Error('Formato de dados inesperado. Esperava um array.');
+      }
+
+      setData(result);
+      // Salvar no localStorage para uso futuro
+      localStorage.setItem('investmentData', JSON.stringify(result));
+    } catch (err) {
+      console.error("Falha ao carregar dados da API:", err);
+      setError('Não foi possível carregar os dados de investimento.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
 
   if (loading) {
     return (
