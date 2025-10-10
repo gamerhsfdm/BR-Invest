@@ -406,19 +406,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="lg:col-span-2">
-                <BrazilMap
-                  data={investmentByState.map((item) => ({
-                    state: item.state,
-                    public:
-                      item.status === "public"
-                        ? item.investment_million_brl
-                        : 0,
-                    private:
-                      item.status === "private"
-                        ? item.investment_million_brl
-                        : 0,
-                  }))}
-                />
+                <BrazilMap/>
               </div>
               <div className="lg:col-span-1">
                 <InvestmentBarCharts data={investmentByState} />
