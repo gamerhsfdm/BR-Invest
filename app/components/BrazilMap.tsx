@@ -1,20 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { Feature, Geometry } from "geojson";
 
 const geoUrl =
   "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson";
-
 interface InvestmentByState {
   state: string;
   public: number;
   private: number;
-}
-
-interface BrazilMapProps {
-  data: InvestmentByState[];
+  area: string;
+  source: string;
 }
 
 interface GeographyProperties {
@@ -29,20 +26,27 @@ const normalizeName = (str: string) =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 
-const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
-  const [selectedState, setSelectedState] = useState<string | null>(null);
+interface StateData {
+  totalInvestmentFormatted: string;
+  area: string;
+  source: string;
+}
+interface RenderMapProps {
+    data: InvestmentByState[];
+    dataByState: Record<string, StateData>;
+    selectedState: string | null;
+    setSelectedState: (state: string | null) => void;
+    selectedData: StateData | null;
+}
 
-  const dataByState: Record<string, { investimento: string }> = {};
-  data.forEach((item) => {
-    if (!item.state || item.public === undefined || item.private === undefined)
-      return;
-    const normalizedState = normalizeName(item.state);
-    const totalInvestment = item.public + item.private;
-    dataByState[normalizedState] = {
-      investimento: `R$${totalInvestment.toLocaleString()} milhões`,
-    };
-  });
-
+const RenderMap: React.FC<RenderMapProps> = ({ 
+    data, 
+    dataByState, 
+    selectedState, 
+    setSelectedState, 
+    selectedData 
+}) => {
+    
   const stateColors: Record<string, string> = {
     "sao paulo": "#8ecae6",
     "minas gerais": "#8ecae6",
@@ -96,47 +100,35 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
   };
 
   return (
-    <div className="w-full bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center col-span-1 lg:col-span-2">
-      <h3 className="text-gray-700 font-semibold mb-3 text-lg text-center">
-        Investimentos por Estado
+    <div className="w-full bg-white rounded-2xl shadow-xl p-6 flex flex-col items-center col-span-1 lg:col-span-2">
+      <h3 className="text-gray-700 font-extrabold mb-4 text-2xl text-center">
+        Mapa de Investimentos no Brasil
       </h3>
 
-      <div className="flex flex-wrap gap-6 mb-6 text-sm text-muted-foreground justify-center">
+      <div className="flex flex-wrap gap-4 mb-6 text-sm text-gray-600 justify-center">
         <div className="flex items-center gap-2">
-          <span
-            className="w-4 h-4 rounded-full"
-            style={{ backgroundColor: "#8ecae6" }}
-          />
+          <span className="w-4 h-4 rounded-full shadow" style={{ backgroundColor: "#8ecae6" }} />
           Sudeste
         </div>
         <div className="flex items-center gap-2">
-          <span
-            className="w-4 h-4 rounded-full"
-            style={{ backgroundColor: "#ffb703" }}
-          />
+          <span className="w-4 h-4 rounded-full shadow" style={{ backgroundColor: "#ffb703" }} />
           Sul / Centro-Oeste
         </div>
         <div className="flex items-center gap-2">
-          <span
-            className="w-4 h-4 rounded-full"
-            style={{ backgroundColor: "#219ebc" }}
-          />
+          <span className="w-4 h-4 rounded-full shadow" style={{ backgroundColor: "#219ebc" }} />
           Norte / Nordeste
         </div>
         <div className="flex items-center gap-2">
-          <span
-            className="w-4 h-4 rounded-full"
-            style={{ backgroundColor: "#fb8500" }}
-          />
+          <span className="w-4 h-4 rounded-full shadow" style={{ backgroundColor: "#fb8500" }} />
           Sem dados
         </div>
       </div>
 
-      <div className="w-full flex justify-center">
+      <div className="w-full max-w-4xl flex justify-center border border-gray-200 rounded-xl overflow-hidden shadow-inner">
         <ComposableMap
           projection="geoMercator"
           projectionConfig={{ center: [-52, -15], scale: 650 }}
-          className="w-full h-[500px]"
+          className="w-full h-[550px] transition duration-300"
         >
           <Geographies geography={geoUrl}>
             {({ geographies }) =>
@@ -150,7 +142,7 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
                   <Geography
                     key={geoTyped.rsmKey}
                     geography={geoTyped}
-                    fill={fill}
+                    fill={selectedState === normalizedName ? pressedFill : fill} // Destaque para o estado selecionado
                     stroke={defaultStroke}
                     strokeWidth={0.5}
                     onClick={() => setSelectedState(normalizedName)}
@@ -166,21 +158,119 @@ const BrazilMap: React.FC<BrazilMapProps> = ({ data }) => {
       </div>
 
       {selectedState && (
-        <div className="mt-6 bg-gray-50 rounded-xl p-4 shadow w-full text-sm text-gray-800 border">
-          <h4 className="font-semibold text-base mb-2 capitalize">
-            {selectedState}
+        <div className="mt-6 bg-blue-50 rounded-xl p-5 shadow-inner w-full max-w-4xl text-sm text-gray-800 border border-blue-200">
+          <h4 className="font-bold text-lg mb-3 capitalize text-blue-900">
+            {selectedState.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
           </h4>
-          {dataByState[selectedState] ? (
-            <p>
-              <strong>Investimento:</strong>{" "}
-              {dataByState[selectedState].investimento}
-            </p>
+          {selectedData ? (
+            <div className="space-y-2">
+              <p>
+                <strong className="text-blue-700">Investimento Total:</strong>{" "}
+                {selectedData.totalInvestmentFormatted}
+              </p>
+              <p>
+                <strong className="text-blue-700">Área Principal:</strong> {selectedData.area}
+              </p>
+              <p>
+                <strong className="text-blue-700">Fonte dos Dados:</strong> {selectedData.source}
+              </p>
+            </div>
           ) : (
-            <p>Sem dados disponíveis para este estado.</p>
+            <p className="text-gray-500 italic">Sem dados detalhados disponíveis para este estado no momento.</p>
           )}
         </div>
       )}
     </div>
+  );
+};
+
+const BrazilMap: React.FC = () => {
+  const [data, setData] = useState<InvestmentByState[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedState, setSelectedState] = useState<string | null>(null);
+
+  const dataByState: Record<string, StateData> = {};
+  data.forEach((item) => {
+    const normalizedState = normalizeName(item.state);
+    const totalInvestment = item.public + item.private;
+    
+    dataByState[normalizedState] = {
+      totalInvestmentFormatted: `R$${totalInvestment.toLocaleString('pt-BR')} milhões`,
+      area: item.area || 'Não especificado',
+      source: item.source || 'Desconhecida',
+    };
+  });
+
+  const selectedData = selectedState ? dataByState[selectedState] : null;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch('/api/ai/dados-por-estado');
+        
+        if (!response.ok) {
+          throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result: InvestmentByState[] = await response.json();
+        
+        if (!Array.isArray(result)) {
+            throw new Error('Formato de dados inesperado. Esperava um array.');
+        }
+
+        setData(result);
+      } catch (err) {
+        console.error("Falha ao carregar dados da API:", err);
+        setError('Não foi possível carregar os dados de investimento.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); 
+
+  if (loading) {
+    return (
+      <div className="w-full bg-white rounded-2xl shadow-xl p-8 text-center text-gray-600 col-span-1 lg:col-span-2 min-h-[600px] flex items-center justify-center">
+        <svg className="animate-spin -ml-1 mr-3 h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Carregando dados do mapa da IA...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full bg-red-50 rounded-2xl shadow-xl p-8 text-center text-red-700 border border-red-300 col-span-1 lg:col-span-2 min-h-[600px] flex flex-col items-center justify-center">
+        <h3 className="text-xl font-bold mb-2">Erro ao carregar dados</h3>
+        <p>{error}</p>
+        <p className="text-sm text-red-500 mt-4">Certifique-se de que a API `/api/ai/dados-por-estado` está configurada corretamente e retornando um JSON válido.</p>
+      </div>
+    );
+  }
+  
+  if (data.length === 0) {
+      return (
+        <div className="w-full bg-yellow-50 rounded-2xl shadow-xl p-8 text-center text-yellow-700 border border-yellow-300 col-span-1 lg:col-span-2 min-h-[600px] flex flex-col items-center justify-center">
+            <h3 className="text-xl font-bold mb-2">Dados Vazios</h3>
+            <p>A API retornou um array vazio. O mapa não pode ser renderizado.</p>
+        </div>
+      );
+  }
+  return (
+    <RenderMap 
+        data={data} 
+        dataByState={dataByState}
+        selectedState={selectedState}
+        setSelectedState={setSelectedState}
+        selectedData={selectedData}
+    />
   );
 };
 
