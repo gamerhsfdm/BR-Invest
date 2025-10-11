@@ -210,7 +210,6 @@ const BrazilMap: React.FC = () => {
     setError(null);
 
     try {
-      // Primeiro, checar se já existe no localStorage
       const cachedData = localStorage.getItem('investmentData');
       if (cachedData) {
         const parsedData: InvestmentByState[] = JSON.parse(cachedData);
@@ -218,8 +217,6 @@ const BrazilMap: React.FC = () => {
         setLoading(false);
         return;
       }
-
-      // Caso não exista, buscar da API
       const response = await fetch('/api/ai/dados-por-estado');
       if (!response.ok) {
         throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
@@ -231,7 +228,6 @@ const BrazilMap: React.FC = () => {
       }
 
       setData(result);
-      // Salvar no localStorage para uso futuro
       localStorage.setItem('investmentData', JSON.stringify(result));
     } catch (err) {
       console.error("Falha ao carregar dados da API:", err);
